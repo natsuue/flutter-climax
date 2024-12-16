@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:test_clima_flutter/screens/city_screen.dart';
 import 'package:test_clima_flutter/services/weather.dart';
 import 'package:test_clima_flutter/utilities/constants.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart';
 import 'package:test_clima_flutter/services/location.dart';
 import 'dart:convert';
-import 'package:test_clima_flutter/screens/city_screen.dart';
 import 'package:test_clima_flutter/services/networking.dart';
 
 class LocationScreen extends StatefulWidget {
@@ -102,72 +99,94 @@ class _LocationScreenState extends State<LocationScreen> {
         constraints: const BoxConstraints.expand(),
         child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Weather display section
+              Column(
                 children: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      getCurrentLocation();
-                    },
-                    child: const Icon(
-                      Icons.near_me,
-                      size: 50.0,
+                  Padding(
+                    padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        isError
+                            ? Text(
+                          'Error',
+                          style: kTempTextStyle,
+                        )
+                            : Text(
+                          temp.toStringAsFixed(0) + '°',
+                          style: kTempTextStyle,
+                        ),
+                        Text(
+                          weathericon,
+                          style: kConditionTextStyle,
+                        ),
+                      ],
                     ),
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      String newcity = await Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return CityScreen();
-                      }));
-                      print(newcity);
-                      getWeatherForCity(newcity);
-                      if (newcity.isEmpty) {
-                        setState(() {
-                          isError = true;
-                          city = "Error";
-                          weathericon = "❌";
-                          weathermessage = "City name cannot be empty!";
-                        });
-                      } else {
-                        getWeatherForCity(newcity);
-                      }
-                    },
-                    child: const Icon(
-                      Icons.location_city,
-                      size: 50.0,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      isError ? weathermessage : "$weathermessage time in $city",
+                      textAlign: TextAlign.center,
+                      style: kMessageTextStyle,
                     ),
                   ),
                 ],
               ),
+
+              // Buttons section
               Padding(
-                padding: EdgeInsets.only(left: 15.0),
+                padding: const EdgeInsets.all(30.0),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    isError
-                        ? Text(
-                      'Error',
-                      style: kTempTextStyle,
-                    )
-                        : Text(
-                      temp.toStringAsFixed(0) + '°',
-                      style: kTempTextStyle,
+                    // Current location button
+                    ElevatedButton(
+                      onPressed: () {
+                        getCurrentLocation();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue, // Button color
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(20),
+                      ),
+                      child: Icon(
+                        Icons.near_me,
+                        size: 60.0,
+                        color: Colors.white,
+                      ),
                     ),
-                    Text(
-                      weathericon,
-                      style: kConditionTextStyle,
+                    // Search city button
+                    ElevatedButton(
+                      onPressed: () async {
+                        String newcity = await Navigator.push(context, MaterialPageRoute(builder: (context) {
+                          return CityScreen();
+                        }));
+                        if (newcity.isEmpty) {
+                          setState(() {
+                            isError = true;
+                            city = "Error";
+                            weathericon = "❌";
+                            weathermessage = "City name cannot be empty!";
+                          });
+                        } else {
+                          getWeatherForCity(newcity);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Button color
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(20),
+                      ),
+                      child: Icon(
+                        Icons.location_city,
+                        size: 60.0,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 15.0),
-                child: Text(
-                  isError ? weathermessage : "$weathermessage time in $city",
-                  textAlign: TextAlign.right,
-                  style: kMessageTextStyle,
                 ),
               ),
             ],
@@ -177,3 +196,4 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 }
+
